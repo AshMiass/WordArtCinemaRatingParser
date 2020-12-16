@@ -31,16 +31,18 @@ class Parser
     {
         $next_page_url = $first_page;
         $max_pages = 3;
-        $category_title = '';
+        $category_id = null;
         while ($next_page_url && $max_pages--) {
             $this->crawler->loadPage($next_page_url);
             $page = $this->crawler->getRaitingPageObject();
             $list = $page->getListElements();
-            if (!$category_title) {
+            if ($category_id === null) {
                 $category_title = $page->getPageTitle();
-                $this->db->saveCategory(['title'=>$category_title, 'url' => $this->base_url . $first_page]);
+                $category_url = $this->base_url . $first_page;
+                $this->db->saveCategory(['title'=>$category_title, 'url' => $category_url]);
+                $category_id = $this->db->getCategoryByUrl($category_url);
             }
-            $this->parsePage($list->getElements());
+            $this->parsePage($list->getElements(), $category_id);
             $next_page_url = $page->getNextPageUrl();
         }
     }
@@ -48,13 +50,11 @@ class Parser
     /**
      * @param RaitingElement[] $elements
      */
-    protected function parsePage(array $elements)
+    protected function parsePage(array $elements, int $category_id)
     {
         foreach ($elements as $element) {
-            echo "{$element->getTitle()} - {$element->getYear()} - {$this->base_url}{$element->getLink()}\n";
             $poster_url = $this->base_url . $this->crawler->getDescriptionPage($element->getLink())->getPosterSrc();
             $image_local_path = $this->crawler->downloadImage($poster_url);
-            echo $image_local_path  . "\n";
             $data = [
                 'title' => $element->getTitle(),
                 'avg_raiting' => $element->getAvgRaiting(),
