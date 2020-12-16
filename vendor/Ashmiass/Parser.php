@@ -29,7 +29,6 @@ class Parser
     }
     public function parse(string $first_page)
     {
-        echo "<pre>";
         $next_page_url = $first_page;
         $max_pages = 3;
         $category_title = '';

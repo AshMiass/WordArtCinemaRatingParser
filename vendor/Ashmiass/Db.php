@@ -25,9 +25,9 @@ class Db
     {
         $sql = "INSERT INTO `categories` (`id`, `title`, `url`) VALUES (NULL, :title, :url); ";
         $sth = $this->pdo->prepare($sql);
-        $sth->execute([]);
-        exit();
+        return $sth->execute([]);
     }
+
     public function saveCategory($data)
     {
         $sql = "INSERT IGNORE INTO `categories` (`id`, `title`, `url`) VALUES (NULL, :title, :url); ";
@@ -36,6 +36,14 @@ class Db
             ':title' => $data['title'],
             ':url' => $data['url']
         ]);
-        exit();
+    }
+    public function getCategoryByUrl($url)
+    {
+        $sql = "SELECT `id`, `title`, `url` FROM `categories` WHERE `url` = :url LIMIT 1; ";
+        $sth = $this->pdo->prepare($sql);
+        $sth->execute([
+            ':url' => $url
+        ]);
+        return $sth->fetch(\PDO::FETCH_ASSOC);
     }
 }
