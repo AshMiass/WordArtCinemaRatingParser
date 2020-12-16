@@ -1,16 +1,16 @@
 <?php
 namespace Ashmiass;
 
-class RaitingElement
+class RatingElement
 {
 
     protected $position;
     protected $title;
     protected $year;
     protected $link;
-    protected $raiting;
+    protected $rating;
     protected $votes;
-    protected $avg_raiting;
+    protected $avg_rating;
 
     /**
      * @param \DOMElement  $dom
@@ -18,7 +18,7 @@ class RaitingElement
     public function __construct(\DOMElement  $dom)
     {
         $td_nodes = $dom->getElementsByTagName('td');
-        $this->position = $td_nodes->item(0)->textContent;
+        $this->position = (int)$td_nodes->item(0)->textContent;
         if ($td_nodes->item(1)->hasChildNodes()) {
             $a = $td_nodes->item(1)->childNodes[0];
             $this->title = $a->nodeValue;
@@ -27,9 +27,9 @@ class RaitingElement
         } else {
             $this->title = $td_nodes->item(1)->nodeValue;
         }
-        $this->raiting = $td_nodes->item(2)->textContent;
+        $this->rating = $td_nodes->item(2)->textContent;
         $this->votes = $td_nodes->item(3)->textContent;
-        $this->avg_raiting = $td_nodes->item(4)->textContent;
+        $this->avg_rating = $td_nodes->item(4)->textContent;
     }
 
     public function getPosition()
@@ -52,9 +52,9 @@ class RaitingElement
         return $this->link;
     }
     
-    public function getRaiting()
+    public function getRating()
     {
-        return $this->raiting;
+        return $this->rating;
     }
     
     public function getVotes()
@@ -62,8 +62,8 @@ class RaitingElement
         return $this->votes;
     }
     
-    public function getAvgRaiting()
+    public function getAvgRating()
     {
-        return $this->avg_raiting;
+        return $this->avg_rating;
     }
 }

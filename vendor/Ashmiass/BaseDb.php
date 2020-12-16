@@ -6,7 +6,7 @@ class BaseDb
     /**
      * @var \PDO
      */
-    private $pdo;
+    protected $pdo;
 
     public function __construct($conf)
     {

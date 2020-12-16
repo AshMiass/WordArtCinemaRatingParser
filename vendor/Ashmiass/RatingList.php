@@ -1,7 +1,7 @@
 <?php
 namespace Ashmiass;
 
-class RaitingList
+class RatingList
 {
     protected $elements = [];
     /**
@@ -10,7 +10,7 @@ class RaitingList
     public function __construct(\DOMNodeList $dom)
     {
         foreach ($dom as $item) {
-            $this->elements[] = new RaitingElement($item);
+            $this->elements[] = new RatingElement($item);
         }
     }
 

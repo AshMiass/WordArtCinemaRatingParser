@@ -1,28 +1,29 @@
 <?php
 namespace Ashmiass;
 
-class RaitingPageObject extends BasePageObject
+class RatingPageObject extends BasePageObject
 {
     /**
      * @var string
      */
     protected $list_xpath = "//tr[1]/td//*[text() = 'Наименование']/ancestor-or-self::table[1]//tr[position()>1]";
     protected $pagination_prev_xpath = "string(//td[@align='left']/a[@class='estimation']/@href)";
-    protected $pagination_next_xpath = "string(//td[@align='right']/a[@class='estimation' or text()='следующие 50']/@href)";
+    protected $pagination_next_xpath = "string(//td[@align='right']" .
+        "/a[@class='estimation' or text()='следующие 50']/@href)";
     protected $page_title_xpath = "string(//html//head/title)";
 
     /**
-     * @var RaitingList
+     * @var RatingList
      */
     protected $list;
 
     /**
-     * @return RaitingList
+     * @return RatingList
      */
     public function getListElements()
     {
         if (!$this->list) {
-            $this->list = new RaitingList($this->dom->query($this->list_xpath));
+            $this->list = new RatingList($this->dom->query($this->list_xpath));
         }
         return $this->list;
     }

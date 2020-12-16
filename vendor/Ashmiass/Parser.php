@@ -35,7 +35,7 @@ class Parser
         $category_id = null;
         while ($next_page_url && $max_pages--) {
             $this->crawler->loadPage($next_page_url);
-            $page = $this->crawler->getRaitingPageObject();
+            $page = $this->crawler->getRatingPageObject();
             $list = $page->getListElements();
             if ($category_id === null) {
                 $category_title = $page->getPageTitle();
@@ -55,7 +55,7 @@ class Parser
     }
 
     /**
-     * @param RaitingElement[] $elements
+     * @param RatingElement[] $elements
      */
     protected function parsePage(array $elements, int $category_id)
     {
@@ -64,8 +64,8 @@ class Parser
             $image_local_path = $this->crawler->downloadImage($poster_url);
             $data = [
                 'title' => $element->getTitle(),
-                'avg_raiting' => $element->getAvgRaiting(),
-                'raiting' => $element->getRaiting(),
+                'avg_rating' => $element->getAvgRating(),
+                'rating' => $element->getRating(),
                 'link' => $element->getLink(),
                 'position' => $element->getPosition(),
                 'votes' => $element->getVotes(),
@@ -74,7 +74,7 @@ class Parser
                 'poster_url' => $poster_url,
                 'category_id' => $category_id
             ];
-            $this->db->saveRaiting($data);
+            $this->db->saveRating($data);
         }
         // echo count($elements) . "\n";
     }

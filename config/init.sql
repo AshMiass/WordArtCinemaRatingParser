@@ -1,4 +1,4 @@
--- Время создания: Дек 16 2020 г., 20:52
+-- Время создания: Дек 16 2020 г., 21:40
 -- Версия сервера: 5.6.47
 -- Версия PHP: 7.4.5
 
@@ -79,7 +79,8 @@ ALTER TABLE `categories`
 -- Индексы таблицы `films`
 --
 ALTER TABLE `films`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `title_year_idx` (`year`,`title`);
 
 --
 -- Индексы таблицы `posters`

@@ -12,7 +12,7 @@ class Crawler
     protected $base_url;
     protected $page_url;
     protected $use_cache;
-    protected $raiting_page_object;
+    protected $rating_page_object;
     protected $download_dir;
 
     public function __construct(string $base_url, string $download_dir, bool $use_cache = false)
@@ -28,7 +28,7 @@ class Crawler
     public function loadPage(string $page_url)
     {
         $this->page_url = $page_url;
-        $this->fetchRaitingPage($this->getUrl());
+        $this->fetchRatingPage($this->getUrl());
     }
 
     /**
@@ -81,17 +81,17 @@ class Crawler
         return $xpath;
     }
 
-    public function fetchRaitingPage(string $url)
+    public function fetchRatingPage(string $url)
     {
-        $this->raiting_page_object = new RaitingPageObject($this->getDocument($url));
+        $this->rating_page_object = new RatingPageObject($this->getDocument($url));
     }
     
     /**
-     * @return RaitingPageObject
+     * @return RatingPageObject
      */
-    public function getRaitingPageObject()
+    public function getRatingPageObject()
     {
-        return $this->raiting_page_object;
+        return $this->rating_page_object;
     }
 
     public function getDescriptionPage($url)
