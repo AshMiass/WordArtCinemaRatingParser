@@ -3,6 +3,7 @@ namespace Ashmiass;
 
 use Ashmiass\Crawler;
 use Ashmiass\Db;
+use Exception;
 
 class Parser
 {
@@ -39,8 +40,14 @@ class Parser
             if ($category_id === null) {
                 $category_title = $page->getPageTitle();
                 $category_url = $this->base_url . $first_page;
-                $this->db->saveCategory(['title'=>$category_title, 'url' => $category_url]);
-                $category_id = $this->db->getCategoryByUrl($category_url);
+                if (!$this->db->saveCategory(['title'=>$category_title, 'url' => $category_url])) {
+                    throw new Exception('Error occured while saving category');
+                };
+                $category = $this->db->getCategoryByUrl($category_url);
+                if (!$category || !isset($category['id'])) {
+                    throw new Exception('Excpected id of category but none given');
+                }
+                $category_id = $category? $category['id'] : null;
             }
             $this->parsePage($list->getElements(), $category_id);
             $next_page_url = $page->getNextPageUrl();
@@ -64,9 +71,10 @@ class Parser
                 'votes' => $element->getVotes(),
                 'year' => $element->getYear(),
                 'poster_path' => $image_local_path,
-                'poster_url' => $poster_url
+                'poster_url' => $poster_url,
+                'category_id' => $category_id
             ];
-            // $this->db->saveRaiting($data);
+            $this->db->saveRaiting($data);
         }
         // echo count($elements) . "\n";
     }
