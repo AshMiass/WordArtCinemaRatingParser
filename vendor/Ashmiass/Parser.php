@@ -2,7 +2,7 @@
 namespace Ashmiass;
 
 use Ashmiass\Crawler;
-use Ashmiass\ParseDb;
+use Ashmiass\ParserDb;
 use DateTime;
 use Exception;
 
@@ -19,11 +19,11 @@ class Parser
     protected $base_url;
     
     /**
-     * @var ParseDb
+     * @var ParserDb
      */
     protected $db;
 
-    public function __construct(string $base_url, ParseDb $db, $cache = true)
+    public function __construct(string $base_url, ParserDb $db, $cache = true)
     {
         $this->base_url = $base_url;
         $this->crawler = new Crawler($base_url, "..".DIRECTORY_SEPARATOR . "uploads", $cache);
@@ -80,10 +80,19 @@ class Parser
                 'parsed_at' => $day
             ];
             $this->db->saveRating($data);
-            if (!$this->db->filmHasPoster($film['id'])) {
-                $poster_url = $this->base_url . $this->crawler->getDescriptionPage($element->getLink())->getPosterSrc();
-                $poster_file = $this->crawler->downloadImage($poster_url);
-                $this->db->savePoster($film['id'], $poster_url, $poster_file);
+            $hasPoster = $this->db->filmHasPoster($film['id']);
+            $hasDesciprion = $this->db->filmHasDescription($film['id']);
+            if (!$hasPoster || !$hasDesciprion) {
+                $descriptionPage = $this->crawler->getDescriptionPage($element->getLink());
+                $poster_url = $this->base_url . $descriptionPage->getPosterSrc();
+                if (!$hasDesciprion) {
+                    $short_description = $descriptionPage->getShortDescription();
+                    $this->db->saveFilmDescription($film['id'], $short_description);
+                }
+                if (!$hasPoster) {
+                    $poster_file = $this->crawler->downloadImage($poster_url);
+                    $this->db->savePoster($film['id'], $poster_url, $poster_file);
+                }
             }
         }
     }

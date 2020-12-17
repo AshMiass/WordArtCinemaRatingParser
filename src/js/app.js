@@ -1,11 +1,47 @@
 var sort_field = 'position';
+var loaded_data = [];
 (async function () {
     console.debug("RUN");
     loadData();
 })()
 
-async function loadData(sortby=''){
-    data = await getData(sortby);
+function openModal(e){
+    data = e.target.parentNode.parentNode.getAttribute('data');
+    console.log('openModal', data)
+    setModal(data);
+}
+
+function setModal(film_id){
+     var modal = document.getElementById('modal');
+     var span = document.getElementsByClassName("close")[0];
+     modal.style.display = "block";
+     var modalContentElement = document.getElementById('modalContent');
+     item = loaded_data[film_id];
+     content = getTemplateForItem(item);
+     content += `<div>${item.short_description?? ''}</div>`
+     modalContentElement.innerHTML = content;
+     // When the user clicks on <span> (x), close the modal
+     span.onclick = function() {
+         modal.style.display = "none";
+         modalContentElement.innerHTML = '';
+     }
+ 
+     // When the user clicks anywhere outside of the modal, close it
+     window.onclick = function(event) {
+         if (event.target == modal) {
+            modalContentElement.innerHTML = '';
+            modal.style.display = "none";
+         }
+     }
+}
+
+function setDate(e){
+    console.debug('setDate',e.target.value)
+    loadData(sort_field, e.target.value);
+}
+
+async function loadData(sortby='', filter=''){
+    data = await getData(sortby, filter);
     content = getTemplate(data);
     document.getElementById('content').innerHTML = content;
     addEvents();
@@ -27,9 +63,10 @@ function addEvents(){
         });
     }
 }
-async function getData(sortby='') {
+async function getData(sortby='', date='') {
     sortby = sortby? `&sort=${sortby}` : '';
-    url = `api.php?ratings${sortby}`;
+    date = date? `&date=${date}` : '';
+    url = `entry.php?ratings${sortby}${date}`;
     let resp = await fetch(url);
     let data = await resp.json()
     console.debug('getData', data);
@@ -57,20 +94,23 @@ function getTemplateForGroup(group_title, items) {
     ];
     content += `<div class="item header">`;
     sortable_fields.forEach((field)=>{
-        content += `<div class="sort ${field.val == sort_field? 'sorted' : ''}" data=${field.val}>${field.label}</div>`;
+        content += `<div class="sort ${field.val == sort_field? 'sorted' : ''}">${field.label}</div>`;
+       
     })        
     content += `</div>`;
     items.forEach((item) => {
+        loaded_data[item.film_id] = item;
         content += getTemplateForItem(item);
     })
+    if (!items.length) content += 'на заданную дату данных нет'
     return content;
 }
 
 function getTemplateForItem(item) {
     let content = '';
-    content += `<div class="item">
+    content += `<div class="item" data="${item.film_id}">
             <div>${item.position}</div>
-            <div>${item.title}</div>
+            <div class='film_title'><span onclick="openModal(event)">${item.title}<span></div>
             <div>${item.rating}</div>
             <div>${item.votes}</div>
             <div>${item.avg_rating}</div>

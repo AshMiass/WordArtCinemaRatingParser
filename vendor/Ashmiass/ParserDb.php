@@ -4,7 +4,7 @@ namespace Ashmiass;
 /**
  * TODO: rewrite all SQL queries with insert ignore statement
  */
-class ParseDb extends BaseDb
+class ParserDb extends BaseDb
 {
     /**
      * @param array[
@@ -21,7 +21,8 @@ class ParseDb extends BaseDb
     {
         //clear film_id for given position
         $sql = "UPDATE `rating` SET `film_id` = NULL " .
-            "   WHERE (`parsed_at` = :parsed_at AND `category_id` = :category AND `position` = :pos AND `film_id` <> :film)";
+            "   WHERE (`parsed_at` = :parsed_at AND `category_id` = :category ".
+            "   AND `position` = :pos AND `film_id` <> :film)";
         $this->pdo->prepare($sql)->execute(
             [
                 ':film' => $data['film_id'],
@@ -81,6 +82,19 @@ class ParseDb extends BaseDb
     }
 
     /**
+     * @param int
+     * @return bool
+     */
+    public function filmHasDescription(int $film_id)
+    {
+        $sql = "SELECT `short_description` FROM `films` WHERE `id` = :film LIMIT 1";
+        $stm = $this->pdo->prepare($sql);
+        $stm->execute([':film' => $film_id]);
+        $data = $stm->fetchColumn();
+        return (bool) $data;
+    }
+
+    /**
      * TODO: add check for record existing before insert
      */
     public function savePoster($film_id, $poster_url, $file_path)
@@ -91,6 +105,16 @@ class ParseDb extends BaseDb
             ':film' => $film_id,
             ':poster_url' => $poster_url,
             ':file_path' => $file_path
+        ]);
+    }
+
+    public function saveFilmDescription($film_id, $short_description)
+    {
+        $sql = "UPDATE  `films` SET short_description = :short_description ".
+            " WHERE `id` = :film;";
+        $this->pdo->prepare($sql)->execute([
+            ':film' => $film_id,
+            ':short_description' => $short_description
         ]);
     }
 
