@@ -1,16 +1,12 @@
--- Время создания: Дек 16 2020 г., 21:40
--- Версия сервера: 5.6.47
--- Версия PHP: 7.4.5
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
 --
--- База данных: `word_art_cinema`
+-- База данных: `{DB_NAME}`
 --
-CREATE DATABASE IF NOT EXISTS `word_art_cinema` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `word_art_cinema`;
+CREATE DATABASE IF NOT EXISTS `{DB_NAME}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `{DB_NAME}`;
 
 -- --------------------------------------------------------
 
@@ -53,14 +49,19 @@ CREATE TABLE `posters` (
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `raiting`
+-- Структура таблицы `rating`
 --
 
-CREATE TABLE `raiting` (
-  `id` bigint(20) NOT NULL,
-  `position` int(11) NOT NULL,
-  `film_id` int(11) NOT NULL,
-  `category_id` int(11) NOT NULL
+CREATE TABLE `rating` (
+  `id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `position` smallint(6) NOT NULL,
+  `film_id` int(11) DEFAULT NULL,
+  `avg_rating` decimal(3,1) NOT NULL,
+  `rating` decimal(6,4) NOT NULL,
+  `votes` int(11) NOT NULL,
+  `parsed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -87,15 +88,15 @@ ALTER TABLE `films`
 --
 ALTER TABLE `posters`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `Posters_fk0` (`film_id`);
+  ADD UNIQUE KEY `film_poster_url` (`film_id`,`poster_url`);
 
 --
--- Индексы таблицы `raiting`
+-- Индексы таблицы `rating`
 --
-ALTER TABLE `raiting`
+ALTER TABLE `rating`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `Raiting_fk0` (`film_id`),
-  ADD KEY `Raiting_fk1` (`category_id`);
+  ADD UNIQUE KEY `category_position` (`position`,`category_id`),
+  ADD UNIQUE KEY `category_film` (`film_id`,`category_id`);
 
 --
 -- AUTO_INCREMENT для сохранённых таблиц
@@ -120,10 +121,10 @@ ALTER TABLE `posters`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT для таблицы `raiting`
+-- AUTO_INCREMENT для таблицы `rating`
 --
-ALTER TABLE `raiting`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `rating`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Ограничения внешнего ключа сохраненных таблиц
@@ -134,11 +135,4 @@ ALTER TABLE `raiting`
 --
 ALTER TABLE `posters`
   ADD CONSTRAINT `Posters_fk0` FOREIGN KEY (`film_id`) REFERENCES `films` (`id`);
-
---
--- Ограничения внешнего ключа таблицы `raiting`
---
-ALTER TABLE `raiting`
-  ADD CONSTRAINT `Raiting_fk0` FOREIGN KEY (`film_id`) REFERENCES `films` (`id`),
-  ADD CONSTRAINT `Raiting_fk1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
 COMMIT;
