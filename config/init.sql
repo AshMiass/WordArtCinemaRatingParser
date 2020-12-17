@@ -60,7 +60,7 @@ CREATE TABLE `rating` (
   `avg_rating` decimal(3,1) NOT NULL,
   `rating` decimal(6,4) NOT NULL,
   `votes` int(11) NOT NULL,
-  `parsed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `parsed_at` date NOT NULL,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
