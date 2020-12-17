@@ -7,10 +7,14 @@ class BaseDb
      * @var \PDO
      */
     protected $pdo;
-
+    /**
+     * @var string
+     */
+    protected $db_name;
     public function __construct($conf)
     {
         $dsn = "{$conf['prefix']}:host={$conf['host']};dbname={$conf['dbname']};charset=utf8";
+        $this->db_name = $conf['dbname'];
         $this->pdo = new \PDO($dsn, $conf['user'], $conf['pass']);
         $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         if (!$this->pdo) {

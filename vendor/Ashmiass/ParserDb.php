@@ -73,6 +73,18 @@ class ParserDb extends BaseDb
      * @param int
      * @return bool
      */
+    public function getPoster(int $film_id)
+    {
+        $sql = "SELECT * FROM `posters` WHERE `film_id` = :film LIMIT 1";
+        $stm = $this->pdo->prepare($sql);
+        $stm->execute([':film' => $film_id]);
+        return $stm->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @param int
+     * @return bool
+     */
     public function filmHasPoster(int $film_id)
     {
         $sql = "SELECT `id` FROM `posters` WHERE `film_id` = :film LIMIT 1";
@@ -168,6 +180,18 @@ class ParserDb extends BaseDb
         $sth = $this->pdo->prepare($sql);
         $sth->execute([
             ':url' => $url
+        ]);
+        return $sth->fetch(\PDO::FETCH_ASSOC);
+    }
+    /**
+     * @return array
+     */
+    public function getCategoryByTitle($title)
+    {
+        $sql = "SELECT `id`, `title`, `url` FROM `categories` WHERE `title` = :title LIMIT 1; ";
+        $sth = $this->pdo->prepare($sql);
+        $sth->execute([
+            ':title' => $title
         ]);
         return $sth->fetch(\PDO::FETCH_ASSOC);
     }

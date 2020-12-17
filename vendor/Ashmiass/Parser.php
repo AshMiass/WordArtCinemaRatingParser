@@ -22,29 +22,47 @@ class Parser
      * @var ParserDb
      */
     protected $db;
+    protected $first_page;
+    protected $next_page_url;
+    protected $log_path;
 
-    public function __construct(string $base_url, ParserDb $db, $cache = true)
+    public function __construct(string $base_url, ParserDb $db, $cache, string $log_path)
     {
         $this->base_url = $base_url;
-        $this->crawler = new Crawler($base_url, "..".DIRECTORY_SEPARATOR . "uploads", $cache);
+        $this->crawler = new Crawler($base_url, ".".DIRECTORY_SEPARATOR . "uploads", $cache);
         $this->db = $db;
+        $this->log_path = $log_path;
     }
-    public function parse(string $first_page)
+
+
+    protected function savePosition($start_page, $next_page_url)
     {
-        $next_page_url = $first_page;
-        $max_pages = 3;
+        $data = [
+            'start_page' => $start_page,
+            'next_page_url' => $next_page_url,
+        ];
+        file_put_contents($this->log_path, json_encode($data));
+    }
+
+    public function parse(string $first_page, string $next_page_url = null)
+    {
+        $this->first_page = $first_page;
+        $next_page_url = $next_page_url?? $this->first_page;
         $category_id = null;
-        while ($next_page_url && $max_pages--) {
+        while ($next_page_url) {
+            $this->next_page_url = $next_page_url;
+            $this->savePosition($this->first_page, $this->next_page_url);
             $this->crawler->loadPage($next_page_url);
             $page = $this->crawler->getRatingPageObject();
             $list = $page->getListElements();
             if ($category_id === null) {
                 $category_title = $page->getPageTitle();
+                $category = $this->db->getCategoryByTitle($category_title);
                 $category_url = $this->base_url . $first_page;
-                if (!$this->db->saveCategory(['title'=>$category_title, 'url' => $category_url])) {
+                if (!$category_url && !$this->db->saveCategory(['title'=>$category_title, 'url' => $category_url])) {
                     throw new Exception('Error occured while saving category');
                 };
-                $category = $this->db->getCategoryByUrl($category_url);
+                !$category_url && $category = $this->db->getCategoryByUrl($category_url);
                 if (!$category || !isset($category['id'])) {
                     throw new Exception('Excpected id of category but none given');
                 }
@@ -80,18 +98,24 @@ class Parser
                 'parsed_at' => $day
             ];
             $this->db->saveRating($data);
-            $hasPoster = $this->db->filmHasPoster($film['id']);
+            $poster = $this->db->getPoster($film['id']);
             $hasDesciprion = $this->db->filmHasDescription($film['id']);
-            if (!$hasPoster || !$hasDesciprion) {
+            if (!$poster || !$hasDesciprion) {
                 $descriptionPage = $this->crawler->getDescriptionPage($element->getLink());
                 $poster_url = $this->base_url . $descriptionPage->getPosterSrc();
                 if (!$hasDesciprion) {
                     $short_description = $descriptionPage->getShortDescription();
                     $this->db->saveFilmDescription($film['id'], $short_description);
                 }
-                if (!$hasPoster) {
-                    $poster_file = $this->crawler->downloadImage($poster_url);
-                    $this->db->savePoster($film['id'], $poster_url, $poster_file);
+                if (!$poster) {
+                    if ($poster_url && $poster_url != $this->base_url) {
+                        $poster_file = $this->crawler->downloadImage($poster_url);
+                    } else {
+                        $poster_file = 'none'; //нет постера
+                    };
+                    if ($poster_file) {
+                        $this->db->savePoster($film['id'], $poster_url, $poster_file);
+                    };
                 }
             }
         }

@@ -100,7 +100,7 @@ class Crawler
         return new DescriptionPageObject($this->getDocument($url));
     }
 
-    public function downloadImage($image_url)
+    public function downloadImage($image_url, $film_id = null)
     {
         $extention = substr($image_url, strrpos($image_url, '.'));
         $file_name = $this->download_dir . DIRECTORY_SEPARATOR . md5($image_url) . $extention;

@@ -48,7 +48,7 @@ class ApiHandler
     protected function executeRatingsAction($request)
     {
         $today = new \DateTime();
-        $date = $request['date']?? $today->format('Y-m-d');
+        $date = $request['date']?? null;
         $sort = $request['sort']?? 'position';
         return $this->db->getRatings(['parsed_at' => $date, 'sort' => $sort]);
     }
