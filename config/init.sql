@@ -95,8 +95,9 @@ ALTER TABLE `posters`
 --
 ALTER TABLE `rating`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `category_position` (`position`,`category_id`),
-  ADD UNIQUE KEY `category_film` (`film_id`,`category_id`);
+  ADD UNIQUE KEY `category_position` (`category_id`,`parsed_at`,`position`) USING BTREE,
+  ADD UNIQUE KEY `category_film` (`parsed_at`,`film_id`,`category_id`) USING BTREE,
+  ADD KEY `film_fk` (`film_id`);
 
 --
 -- AUTO_INCREMENT для сохранённых таблиц
@@ -135,4 +136,11 @@ ALTER TABLE `rating`
 --
 ALTER TABLE `posters`
   ADD CONSTRAINT `Posters_fk0` FOREIGN KEY (`film_id`) REFERENCES `films` (`id`);
+
+--
+-- Ограничения внешнего ключа таблицы `rating`
+--
+ALTER TABLE `rating`
+  ADD CONSTRAINT `category_fk` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
+  ADD CONSTRAINT `film_fk` FOREIGN KEY (`film_id`) REFERENCES `films` (`id`);
 COMMIT;

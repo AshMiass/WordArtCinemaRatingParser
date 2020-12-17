@@ -2,7 +2,7 @@
 namespace Ashmiass;
 
 use Ashmiass\Crawler;
-use Ashmiass\Db;
+use Ashmiass\ParseDb;
 use DateTime;
 use Exception;
 
@@ -19,11 +19,11 @@ class Parser
     protected $base_url;
     
     /**
-     * @var Db
+     * @var ParseDb
      */
     protected $db;
 
-    public function __construct(string $base_url, Db $db, $cache = true)
+    public function __construct(string $base_url, ParseDb $db, $cache = true)
     {
         $this->base_url = $base_url;
         $this->crawler = new Crawler($base_url, "..".DIRECTORY_SEPARATOR . "uploads", $cache);
@@ -86,6 +86,5 @@ class Parser
                 $this->db->savePoster($film['id'], $poster_url, $poster_file);
             }
         }
-        // echo count($elements) . "\n";
     }
 }

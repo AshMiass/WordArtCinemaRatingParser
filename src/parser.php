@@ -3,6 +3,7 @@
  * Time spent: 5h+5h+5h
  */
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR .'autoload.php';
+set_time_limit(0);
 
 use Ashmiass\Parser;
 use Ashmiass\Db;

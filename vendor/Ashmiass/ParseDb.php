@@ -4,7 +4,7 @@ namespace Ashmiass;
 /**
  * TODO: rewrite all SQL queries with insert ignore statement
  */
-class Db extends BaseDb
+class ParseDb extends BaseDb
 {
     /**
      * @param array[
