@@ -60,21 +60,27 @@ class Parser
     protected function parsePage(array $elements, int $category_id)
     {
         foreach ($elements as $element) {
-            $poster_url = $this->base_url . $this->crawler->getDescriptionPage($element->getLink())->getPosterSrc();
-            $image_local_path = $this->crawler->downloadImage($poster_url);
+            $film = $this->db->saveFilm(
+                [
+                    'title'=> $element->getTitle(),
+                    'year' => $element->getYear(),
+                    'url' => $this->base_url . $element->getLink()
+                ]
+            );
             $data = [
-                'title' => $element->getTitle(),
+                'film_id' => $film['id'],
                 'avg_rating' => $element->getAvgRating(),
                 'rating' => $element->getRating(),
-                'link' => $element->getLink(),
                 'position' => $element->getPosition(),
                 'votes' => $element->getVotes(),
-                'year' => $element->getYear(),
-                'poster_path' => $image_local_path,
-                'poster_url' => $poster_url,
                 'category_id' => $category_id
             ];
             $this->db->saveRating($data);
+            if (!$this->db->filmHasPoster($film['id'])) {
+                $poster_url = $this->base_url . $this->crawler->getDescriptionPage($element->getLink())->getPosterSrc();
+                $poster_file = $this->crawler->downloadImage($poster_url);
+                $this->db->savePoster($film['id'], $poster_url, $poster_file);
+            }
         }
         // echo count($elements) . "\n";
     }

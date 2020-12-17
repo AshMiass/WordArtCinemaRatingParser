@@ -1,50 +1,35 @@
 <?php
 namespace Ashmiass;
 
+/**
+ * TODO: rewrite all SQL queries with insert ignore statement
+ */
 class Db extends BaseDb
 {
     /**
      * @param array[
-     *     'title',
      *     'avg_rating',
      *     'rating',
      *     'votes',
      *     'position',
-     *     'link',
-     *     'year',
-     *     'poster_path',
-     *     'poster_url',
      *     'category_id'
      * ]
      *
-     * TODO: make method smaller
+     * TODO: make method slim
      */
     public function saveRating(array $data)
     {
-        $this->saveFilm(['title'=> $data['title'], 'year' => $data['year'], 'url' => $data['link']]);
-        $film = $this->getFilmByTitleAndYear($data['title'], $data['year']);
-
         //clear film_id for given position
         $sql = "UPDATE `rating` SET `film_id` = NULL " .
             "   WHERE (`category_id` = :category AND `position` = :pos AND `film_id` <> :film)";
         $this->pdo->prepare($sql)->execute(
             [
-                ':film' => $film['id'],
+                ':film' => $data['film_id'],
                 ':category' => $data['category_id'],
                 ':pos' => $data['position']
             ]
         );
 
-       
-        // $sql = "UPDATE `rating` SET avg_rating = 11, rating = 12 WHERE `category_id` = :category AND `position` = :pos";
-        // $sth = $this->pdo->prepare($sql);
-        // $sth->execute(
-        //     [
-        //         ':category' => $data['category_id'],
-        //         ':pos' => $data['position']
-        //     ]
-        // );
-        // var_dump($sth->rowCount(), (int)$film['id']);exit;
         $sql = "UPDATE `rating` SET `film_id` = :film, ".
                 "   `avg_rating` = :avg_rating, ".
                 "   `rating` = :rating, ".
@@ -54,7 +39,7 @@ class Db extends BaseDb
         $sth = $this->pdo->prepare($sql);
         $sth->execute(
             [
-                ':film' => (int)$film['id'],
+                ':film' => $data['film_id'],
                 ':avg_rating' => $data['avg_rating'],
                 ':rating' => $data['rating'],
                 ':votes' => $data['votes'],
@@ -62,16 +47,14 @@ class Db extends BaseDb
                 ':pos' => $data['position']
                 ]
         );
-        // var_dump($sth->rowCount(), (int)$film['id']);exit;
         if ($sth->rowCount() < 1) {
             $sql = "INSERT INTO `rating` (`position`, `film_id`, `category_id`, `avg_rating`, `rating`, `votes`) ".
                     " VALUES (:pos, :film, :category, :avg_rating, :rating, :votes);";
             $sth = $this->pdo->prepare($sql);
-            // var_dump($data, $film['id']);
             $sth->execute(
                 [
                     ':pos' => $data['position'],
-                    ':film' => $film['id'],
+                    ':film' => $data['film_id'],
                     ':category' => $data['category_id'],
                     ':avg_rating' => $data['avg_rating'],
                     ':rating' => $data['rating'],
@@ -79,7 +62,18 @@ class Db extends BaseDb
                 ]
             );
         }
-        $this->savePoster($film['id'], $data['poster_url'], $data['poster_path']);
+    }
+
+    /**
+     * @param int
+     * @return bool
+     */
+    public function filmHasPoster(int $film_id)
+    {
+        $sql = "SELECT `id` FROM `posters` WHERE `film_id` = :film LIMIT 1";
+        $stm = $this->pdo->prepare($sql);
+        $stm->execute([':film' => $film_id]);
+        return (bool) $stm->fetch();
     }
 
     /**
@@ -88,7 +82,7 @@ class Db extends BaseDb
     public function savePoster($film_id, $poster_url, $file_path)
     {
         $sql = "INSERT IGNORE INTO `posters` (`film_id`, `poster_url`, `file_path`) ".
-            "VALUES (:film, :poster_url, :file_path);";
+            " VALUES (:film, :poster_url, :file_path);";
         $this->pdo->prepare($sql)->execute([
             ':film' => $film_id,
             ':poster_url' => $poster_url,
@@ -98,16 +92,21 @@ class Db extends BaseDb
 
     /**
      * @return bool
-     */
+    */
     public function saveFilm($data)
     {
+        $film = $this->getFilmByTitleAndYear($data['title'], $data['year']);
+        if ($film) {
+            return $film;
+        }
         $sql = "INSERT IGNORE INTO `films` (`title`, `year`, `description_url`) VALUES (:title, :year, :url);";
         $sth = $this->pdo->prepare($sql);
-        return $sth->execute([
+        $sth->execute([
             ':title' => $data['title'],
             ':year' => $data['year'],
             ':url' => $data['url']
         ]);
+        return $this->getFilmByTitleAndYear($data['title'], $data['year']);
     }
     public function getFilmByTitleAndYear($title, $year)
     {
