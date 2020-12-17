@@ -22,6 +22,7 @@ class ApiDb extends BaseDb
         $categories = $stm->fetchAll(\PDO::FETCH_ASSOC);
         $order = "ORDER BY `" . ($criteria['sort']?? 'position') ."`";
         $sql = "SELECT * FROM `rating` ".
+                " LEFT JOIN `films` ON (`films`.`id` = `rating`.`film_id`) ".
                 " WHERE `category_id` = :category AND `parsed_at` = :parsed_at $order LIMIT 10";
         $sth = $this->pdo->prepare($sql);
         foreach ($categories as $category) {
