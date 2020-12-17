@@ -3,6 +3,7 @@ namespace Ashmiass;
 
 use Ashmiass\Crawler;
 use Ashmiass\Db;
+use DateTime;
 use Exception;
 
 class Parser
@@ -59,6 +60,8 @@ class Parser
      */
     protected function parsePage(array $elements, int $category_id)
     {
+        $day = new DateTime();
+        $day = $day->format('Y-m-d');
         foreach ($elements as $element) {
             $film = $this->db->saveFilm(
                 [
@@ -73,7 +76,8 @@ class Parser
                 'rating' => $element->getRating(),
                 'position' => $element->getPosition(),
                 'votes' => $element->getVotes(),
-                'category_id' => $category_id
+                'category_id' => $category_id,
+                'parsed_at' => $day
             ];
             $this->db->saveRating($data);
             if (!$this->db->filmHasPoster($film['id'])) {

@@ -21,12 +21,13 @@ class Db extends BaseDb
     {
         //clear film_id for given position
         $sql = "UPDATE `rating` SET `film_id` = NULL " .
-            "   WHERE (`category_id` = :category AND `position` = :pos AND `film_id` <> :film)";
+            "   WHERE (`parsed_at` = :parsed_at AND `category_id` = :category AND `position` = :pos AND `film_id` <> :film)";
         $this->pdo->prepare($sql)->execute(
             [
                 ':film' => $data['film_id'],
                 ':category' => $data['category_id'],
-                ':pos' => $data['position']
+                ':pos' => $data['position'],
+                ':parsed_at' => $data['parsed_at']
             ]
         );
 
@@ -35,7 +36,7 @@ class Db extends BaseDb
                 "   `rating` = :rating, ".
                 "   `votes` = :votes, " .
                 "   `updated_at` = now() ".
-                " WHERE `category_id` = :category AND `position` = :pos;";
+                " WHERE `category_id` = :category AND `position` = :pos AND `parsed_at` = :parsed_at; ";
         $sth = $this->pdo->prepare($sql);
         $sth->execute(
             [
@@ -44,12 +45,14 @@ class Db extends BaseDb
                 ':rating' => $data['rating'],
                 ':votes' => $data['votes'],
                 ':category' => $data['category_id'],
-                ':pos' => $data['position']
+                ':pos' => $data['position'],
+                ':parsed_at' => $data['parsed_at']
                 ]
         );
         if ($sth->rowCount() < 1) {
-            $sql = "INSERT INTO `rating` (`position`, `film_id`, `category_id`, `avg_rating`, `rating`, `votes`) ".
-                    " VALUES (:pos, :film, :category, :avg_rating, :rating, :votes);";
+            $sql = "INSERT INTO `rating` ".
+                    " (`position`, `film_id`, `category_id`, `avg_rating`, `rating`, `votes`, `parsed_at`)".
+                    " VALUES (:pos, :film, :category, :avg_rating, :rating, :votes, :parsed_at);";
             $sth = $this->pdo->prepare($sql);
             $sth->execute(
                 [
@@ -58,7 +61,8 @@ class Db extends BaseDb
                     ':category' => $data['category_id'],
                     ':avg_rating' => $data['avg_rating'],
                     ':rating' => $data['rating'],
-                    ':votes' => $data['votes']
+                    ':votes' => $data['votes'],
+                    ':parsed_at' => $data['parsed_at'],
                 ]
             );
         }
