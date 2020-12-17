@@ -11,13 +11,20 @@ $db = new ApiDb($conf['connection']);
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     return;
 }
-$action = $_REQUEST[0]?? 'getRatings';
-$today = new DateTime();
-$category = $_REQUEST['category']?? 2;
-$date = $_REQUEST['date']?? $today->format('Y-m-d');
-$sort = $_REQUEST['sort']?? 'position';
 $res = [];
-if ($action == 'getRatings') {
+$action = 'ratings';
+if (key_exists('film', $_REQUEST)) {
+    $action = 'film';
+}
+if ($action == 'ratings') {
+    $today = new DateTime();
+    $category = $_REQUEST['category']?? 2;
+    $date = $_REQUEST['date']?? $today->format('Y-m-d');
+    $sort = $_REQUEST['sort']?? 'position';
     $res = $db->getRatings(['parsed_at' => $date, 'sort' => $sort]);
+}
+if ($action == 'film' && !empty($_REQUEST['film']) && is_numeric($_REQUEST['film'])) {
+    $film_id = $_REQUEST['film'];
+    $res = $db->getFilm($film_id);
 }
 echo json_encode($res);

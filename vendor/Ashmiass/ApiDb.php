@@ -8,7 +8,10 @@ class ApiDb extends BaseDb
     
     public function getFilm(int $film_id)
     {
-        $sql = "SELECT * FROM `films`  LIMIT 1";
+        $sql = "SELECT * FROM `films` WHERE `id` = :film LIMIT 1";
+        $stm = $this->pdo->prepare($sql);
+        $stm->execute([':film' => $film_id]);
+        return $stm->fetch(\PDO::FETCH_ASSOC);
     }
     
     public function getRatings(array $criteria)
